@@ -1,7 +1,8 @@
-<p style="display:flex; align-items:center; gap:8px;">
-  <img src="assets/logo.png" alt="WebOsz Logo" width="200">
-  <span style="color:pink; font-weight:bold;">- WebOsz</span>
-</p>
+<span style="display: inline-block; vertical-align: middle;">
+  <img src="assets/logo.png" alt="WebOsz Logo" width="100" style="vertical-align: middle;">
+</span>
+<span style="color: pink; font-weight: bold; vertical-align: middle; margin-left: 8px;">- WebOsz</span>
+
 
 <table>
   <tr>
