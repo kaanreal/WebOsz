@@ -96,6 +96,7 @@
 
     /* Screen containers */
     .menu-screen, .game-screen, .results-screen {
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -689,7 +690,6 @@
         display: flex;
         justify-content: space-around;
         box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
-        flex-grow: 1;
     }
 
     /* Note Columns */
