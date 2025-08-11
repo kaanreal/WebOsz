@@ -1,48 +1,54 @@
+![WebOsz Logo](assets/logo.png) 
+
 # WebOsz
 
-    ![WebOsz Logo](assets/logo.png) <!-- Replace with your actual logo -->
+**WebOsz** is a sleek browser-based rhythm game inspired by the popular `osu!mania` game mode. Built with modern web technologies, it lets you play your favorite beatmaps directly in your browser by loading `.osz` files — no installation needed.
 
-    **WebOsz** is a sleek, browser-based rhythm game inspired by the popular `osu!mania` game mode. Built with modern web technologies, it allows you to play your favorite beatmaps directly in your browser by simply loading an `.osz` file.
+## ✨ Features
 
-    ## ✨ Features
+- **No Installation Required**  
+  Simply open `index.html` in your browser and start playing — no build tools or servers needed.
 
-    -   **Zero-Installation Gameplay**: No build tools or servers required. Just open `index.html` and play.
-    -   **`.osz` File Support**: Load your existing `osu!mania` 4-key beatmap archives.
-    -   **Customizable Experience**:
-        -   Adjustable scroll speed.
-        -   Variable map playback rate (with optional pitch preservation).
-        -   Configurable keybinds.
-        -   Customizable note and accent colors.
-    -   **Performance Metrics**: Track your score, combo, and accuracy with detailed post-game results.
-    -   **Modern & Responsive UI**: A clean, intuitive interface that looks great on all screen sizes.
+- **`.osz` File Support**  
+  Load your existing `osu!mania` 4-key beatmap archives effortlessly.
 
-    ## 🚀 Getting Started
+- **Customizable Gameplay**  
+  - Adjustable scroll speed  
+  - Variable playback rate (with optional pitch preservation)  
+  - Configurable keybinds  
+  - Custom note and accent colors
 
-    There is no installation or build step required.
+- **Performance Tracking**  
+  View your score, combo, and accuracy with detailed post-game stats.
 
-    1.  Clone or download this repository.
-    2.  Open the `index.html` file in your favorite web browser.
-    3.  That's it!
+- **Modern & Responsive UI**  
+  Clean and intuitive interface that works well on all screen sizes.
 
-    ## 🎮 How to Play
+## 🚀 Getting Started
 
-    1.  **Launch the game**: Open `index.html` in your web browser.
-    2.  **Load a Beatmap**: Click the central circle on the start screen to select an `.osz` file from your computer.
-    3.  **Select Difficulty**: Once the beatmap is loaded, choose a difficulty from the list.
-    4.  **Customize (Optional)**: Use the bottom navigation bar to adjust scroll speed, map rate, or keybinds.
-    5.  **Play**: Hit the "Play" button and get ready! Notes will fall from the top of the screen. Press the corresponding key as a note reaches the judgment line.
+1. Clone or download this repository.  
+2. Open `index.html` in your preferred web browser.  
+3. Enjoy!
 
-    ## 🔧 Customization
+## 🎮 How to Play
 
-    ### Logo
-    To add your own logo, place your image file in the `assets/` folder and update the `<img>` tag in the `README.md` if needed.
+1. Open `index.html` in your web browser.  
+2. Click the center circle on the start screen to load an `.osz` beatmap from your device.  
+3. Select a difficulty from the list once the map loads.  
+4. Optionally, adjust scroll speed, playback rate, or keybinds via the bottom navigation bar.  
+5. Press “Play” and hit the corresponding keys as notes reach the judgment line.
 
-    ### Keybinds
-    You can change the default keybinds (`D`, `F`, `J`, `K`) from the "Keybinds" menu. Your preferences will be saved in your browser's local storage.
+## 🔧 Customization
 
-    ### Colors
-    The "Customize" menu allows you to change the accent color of the UI and the colors for each of the four note lanes. These are also saved locally.
+### Logo  
+Place your logo image inside the `assets/` folder and update the `<img>` tag in this README if needed.
 
-    ## 📄 License
+### Keybinds  
+Change default keys (`D`, `F`, `J`, `K`) in the Keybinds menu. Preferences are saved locally in your browser.
 
-    This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+### Colors  
+Customize the UI accent color and note lane colors from the Customize menu. Changes are saved locally.
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
