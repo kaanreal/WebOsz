@@ -1,7 +1,5 @@
-<img src="assets/logo.png" alt="WebOsz Logo" width="200">
+<img src="assets/logo.png" alt="WebOsz Logo" width="200">   -   # WebOsz
 
-
-# WebOsz
 
 **WebOsz** is a sleek browser-based rhythm game inspired by the popular `osu!mania` game mode. Built with modern web technologies, it lets you play your favorite beatmaps directly in your browser by loading `.osz` files — no installation needed.
 
