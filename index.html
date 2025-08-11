@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>WebOsz</title>
+        <link rel="stylesheet" href="css/main.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    </head>
+    <body>
+        <!-- Start Screen is now a top-level element for fullscreen layout -->
+        <div class="start-screen" id="startScreen">
+            <div class="particle-background"></div>
+            <div class="file-input-circle-wrapper">
+                <label for="oszFileInput" class="file-input-circle-label">
+                    <img src="https://images.pexels.com/photos/164005/pexels-photo-164005.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Select Beatmap" class="circle-image">
+                    <span class="circle-text" id="startScreenFileName">Load Beatmap</span>
+                    <input type="file" id="oszFileInput" accept=".osz" class="hidden-file-input">
+                </label>
+            </div>
+            <p class="start-instructions">Click the circle to load an .osz file.</p>
+        </div>
+
+        <!-- The rest of the game remains inside the container -->
+        <div class="game-container hidden" id="gameContainer">
+            <!-- Menu Screen (Map Overview) -->
+            <div class="menu-screen hidden" id="menuScreen">
+                <div class="map-background-overlay" id="mapBackgroundOverlay"></div>
+                <div class="menu-header">
+                    <button id="backToStartButton" class="menu-back-button">Back to Start</button>
+                    <button id="customizeButton" class="menu-customize-button">Customize</button>
+                </div>
+                <div class="menu-content">
+                    <h2 class="map-title" id="mapTitle">Select a Difficulty</h2>
+                    <div class="difficulty-list-container" id="difficultyListContainer">
+                        <!-- Difficulties will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- Navbar -->
+                <div class="navbar">
+                    <div class="navbar-item">
+                        <label for="scrollSpeedInput" class="navbar-label">Scroll Speed:</label>
+                        <input type="range" id="scrollSpeedInput" min="1" max="40" value="10.0" step="0.1" class="navbar-slider">
+                        <span id="scrollSpeedValue" class="navbar-value">10.0x</span>
+                    </div>
+                    <div class="navbar-item">
+                        <label for="mapRateInput" class="navbar-label">Map Rate:</label>
+                        <input type="range" id="mapRateInput" min="0.5" max="2.0" value="1.0" step="0.05" class="navbar-slider">
+                        <span id="mapRateValue" class="navbar-value">1.00x</span>
+                    </div>
+                    <div class="navbar-item checkbox-item">
+                        <input type="checkbox" id="preservePitchToggle" class="navbar-checkbox">
+                        <label for="preservePitchToggle" class="navbar-label">Change Pitch</label>
+                    </div>
+                    <button id="keybindsButton" class="navbar-button">Keybinds</button>
+                    <button id="startButton" disabled class="navbar-button primary-button">Play</button>
+                </div>
+            </div>
+
+            <!-- Keybinds Overlay -->
+            <div class="keybinds-overlay hidden" id="keybindsOverlay">
+                <div class="overlay-content">
+                    <h2 class="overlay-title">Configure Keybinds</h2>
+                    <div class="keybind-grid" id="keybindGrid">
+                        <!-- Keybinds will be dynamically inserted here -->
+                    </div>
+                    <button class="overlay-close-button" id="closeKeybindsOverlay">Close</button>
+                </div>
+            </div>
+
+            <!-- Customize Overlay -->
+            <div class="customize-overlay hidden" id="customizeOverlay">
+                <div class="overlay-content">
+                    <h2 class="overlay-title">Customize Colors</h2>
+                    <div class="color-grid" id="colorGrid">
+                        <div class="color-item">
+                            <label for="accentColorInput" class="color-label">Accent Color:</label>
+                            <input type="color" id="accentColorInput" class="color-input">
+                        </div>
+                        <div class="color-item">
+                            <label for="noteColor1Input" class="color-label">Note Color 1:</label>
+                            <input type="color" id="noteColor1Input" class="color-input">
+                        </div>
+                        <div class="color-item">
+                            <label for="noteColor2Input" class="color-label">Note Color 2:</label>
+                            <input type="color" id="noteColor2Input" class="color-input">
+                        </div>
+                        <div class="color-item">
+                            <label for="noteColor3Input" class="color-label">Note Color 3:</label>
+                            <input type="color" id="noteColor3Input" class="color-input">
+                        </div>
+                        <div class="color-item">
+                            <label for="noteColor4Input" class="color-label">Note Color 4:</label>
+                            <input type="color" id="noteColor4Input" class="color-input">
+                        </div>
+                    </div>
+                    <button class="overlay-close-button" id="closeCustomizeOverlay">Close</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div class="game-screen hidden" id="gameScreen">
+                <div class="game-header">
+                    <button id="backButton" class="game-back-button">Back</button>
+                </div>
+                <div class="game-area">
+                    <div class="accuracy-display-overlay"><span id="liveAccuracyDisplay">0.00%</span></div>
+                    <div class="combo-display-overlay"><span id="combo">0</span></div>
+                    <div class="note-column" id="note-column-0"></div>
+                    <div class="note-column" id="note-column-1"></div>
+                    <div class="note-column" id="note-column-2"></div>
+                    <div class="note-column" id="note-column-3"></div>
+                    <div class="judgment-line"></div>
+                    <div class="key-display">
+                        <div class="key-button" id="key-0"></div>
+                        <div class="key-button" id="key-1"></div>
+                        <div class="key-button" id="key-2"></div>
+                        <div class="key-button" id="key-3"></div>
+                    </div>
+                </div>
+                <div class="song-progress-bar">
+                    <div class="progress-fill" id="songProgressBarFill"></div>
+                </div>
+                <audio id="gameAudio" preload="auto"></audio>
+            </div>
+
+            <!-- Results Screen -->
+            <div class="results-screen hidden" id="resultsScreen">
+                <h2 class="results-title">Game Over!</h2>
+                <div class="results-summary">
+                    <p>Final Score: <span id="finalScore">0</span></p>
+                    <p>Max Combo: <span id="maxCombo">0</span></p>
+                    <p>Accuracy: <span id="accuracyDisplay">0.00%</span></p>
+                    <p class="rank-display">Rank: <span id="rankDisplay">D</span></p>
+                </div>
+                <div class="judgment-counts">
+                    <h3>Judgment Counts:</h3>
+                    <p>MAX: <span id="countMaxDisplay">0</span></p>
+                    <p>300: <span id="count300Display">0</span></p>
+                    <p>100: <span id="count100Display">0</span></p>
+                    <p>50: <span id="count50Display">0</span></p>
+                    <p>Miss: <span id="countMissDisplay">0</span></p>
+                </div>
+                <div class="results-buttons">
+                    <button id="retryButton" class="results-button">Retry</button>
+                    <button id="backToMenuButton" class="results-button">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="js/main.js"></script>
+    </body>
+    </html>
