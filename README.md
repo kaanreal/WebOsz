@@ -1,4 +1,5 @@
-![WebOsz Logo](assets/logo.png) 
+<img src="assets/logo.png" alt="WebOsz Logo" width="200">
+
 
 # WebOsz
 
