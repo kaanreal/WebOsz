@@ -8,6 +8,7 @@
 
 - **No Installation Required**  
   Simply open `index.html` in your browser and start playing — no build tools or servers needed.
+  Or use this link https://kaanreal.github.io/WebOsz/
 
 - **`.osz` File Support**  
   Load your existing `osu!mania` 4-key beatmap archives effortlessly.
@@ -32,7 +33,7 @@
 
 ## 🎮 How to Play
 
-1. Open `index.html` in your web browser.  
+1. Open `index.html` in your web browser. or this site https://kaanreal.github.io/WebOsz/ 
 2. Click the center circle on the start screen to load an `.osz` beatmap from your device.  
 3. Select a difficulty from the list once the map loads.  
 4. Optionally, adjust scroll speed, playback rate, or keybinds via the bottom navigation bar.  
@@ -40,8 +41,6 @@
 
 ## 🔧 Customization
 
-### Logo  
-Place your logo image inside the `assets/` folder and update the `<img>` tag in this README if needed.
 
 ### Keybinds  
 Change default keys (`D`, `F`, `J`, `K`) in the Keybinds menu. Preferences are saved locally in your browser.
