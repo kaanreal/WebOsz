@@ -1,12 +1,14 @@
-<img src="assets/logo.png" alt="WebOsz Logo" width="200">   -   # WebOsz
-
+<p style="display:flex; align-items:center; gap:8px;">
+  <img src="assets/logo.png" alt="WebOsz Logo" width="200">
+  <span style="color:pink; font-weight:bold;">- WebOsz</span>
+</p>
 
 **WebOsz** is a sleek browser-based rhythm game inspired by the popular `osu!mania` game mode. Built with modern web technologies, it lets you play your favorite beatmaps directly in your browser by loading `.osz` files — no installation needed.
 
 ## ✨ Features
 
 - **No Installation Required**  
-  Simply open `index.html` in your browser and start playing — no build tools or servers needed.
+  Simply open `index.html` in your browser and start playing — no build tools or servers needed.  
   Or use this link https://kaanreal.github.io/WebOsz/
 
 - **`.osz` File Support**  
@@ -32,14 +34,13 @@
 
 ## 🎮 How to Play
 
-1. Open `index.html` in your web browser. or this site https://kaanreal.github.io/WebOsz/ 
+1. Open `index.html` in your web browser or visit this site https://kaanreal.github.io/WebOsz/  
 2. Click the center circle on the start screen to load an `.osz` beatmap from your device.  
 3. Select a difficulty from the list once the map loads.  
 4. Optionally, adjust scroll speed, playback rate, or keybinds via the bottom navigation bar.  
 5. Press “Play” and hit the corresponding keys as notes reach the judgment line.
 
 ## 🔧 Customization
-
 
 ### Keybinds  
 Change default keys (`D`, `F`, `J`, `K`) in the Keybinds menu. Preferences are saved locally in your browser.
