@@ -20,7 +20,47 @@
 			<input type="file" id="oszFileInput" accept=".osz" style="display:none"><button onclick="document.getElementById('oszFileInput').click()"></button>
                 </label>
             </div>
-            <p class="start-instructions">Click the circle to load an .osz file.</p>
+            <div class="start-options">
+                <p class="start-instructions">Click the circle to load an .osz file.</p>
+                <button id="searchMapsButton" class="search-maps-button">Search Online Maps</button>
+            </div>
+        </div>
+
+        <!-- Map Search Overlay -->
+        <div class="map-search-overlay hidden" id="mapSearchOverlay">
+            <div class="map-search-content">
+                <div class="search-header">
+                    <h2>Search Online Maps</h2>
+                    <button id="closeSearchOverlay" class="close-search-button">×</button>
+                </div>
+                <div class="search-controls">
+                    <div class="search-input-container">
+                        <input type="text" id="mapSearchInput" placeholder="Search for artist, title, or mapper..." class="search-input">
+                        <button id="executeSearchButton" class="search-button">Search</button>
+                    </div>
+                    <div class="search-filters">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="1">Ranked</option>
+                            <option value="2">Approved</option>
+                            <option value="4">Loved</option>
+                            <option value="3">Qualified</option>
+                            <option value="-2">Graveyard</option>
+                            <option value="-1">Pending</option>
+                        </select>
+                        <div class="mode-info">4K Mania Only</div>
+                    </div>
+                </div>
+                <div class="search-results" id="searchResults">
+                    <div class="search-placeholder">
+                        <p>Search for beatmaps to find and download maps directly!</p>
+                    </div>
+                </div>
+                <div class="search-loading hidden" id="searchLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Searching...</p>
+                </div>
+            </div>
         </div>
 
         <!-- The rest of the game remains inside the container -->

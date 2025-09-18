@@ -63,6 +63,16 @@
 
     const keybindGrid = document.getElementById('keybindGrid');
 
+    // Map Search Elements
+    const searchMapsButton = document.getElementById('searchMapsButton');
+    const mapSearchOverlay = document.getElementById('mapSearchOverlay');
+    const closeSearchOverlay = document.getElementById('closeSearchOverlay');
+    const mapSearchInput = document.getElementById('mapSearchInput');
+    const executeSearchButton = document.getElementById('executeSearchButton');
+    const statusFilter = document.getElementById('statusFilter');
+    const searchResults = document.getElementById('searchResults');
+    const searchLoading = document.getElementById('searchLoading');
+
     // Game State
     let currentBeatmap = null;
     let availableBeatmaps = [];
@@ -481,6 +491,32 @@
     noteColor3Input.addEventListener('input', (e) => saveCustomColor('--note-color-3', e.target.value));
     noteColor4Input.addEventListener('input', (e) => saveCustomColor('--note-color-4', e.target.value));
 
+    // Map Search Event Listeners
+    searchMapsButton.addEventListener('click', () => {
+        showOverlay(mapSearchOverlay);
+    });
+
+    closeSearchOverlay.addEventListener('click', () => {
+        // Stop any playing preview
+        if (currentPreviewAudio) {
+            currentPreviewAudio.pause();
+            currentPreviewAudio.src = '';
+            currentPreviewAudio = null;
+            currentPreviewButton = null;
+        }
+        hideOverlay(mapSearchOverlay);
+    });
+
+    executeSearchButton.addEventListener('click', () => {
+        searchMaps();
+    });
+
+    mapSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            searchMaps();
+        }
+    });
+
 
     retryButton.addEventListener('click', () => {
         if (currentBeatmap && gameAudio.src) {
@@ -590,7 +626,8 @@
         }
 
         if (availableBeatmaps.length === 0) {
-            throw new Error('No valid beatmaps with accessible audio files found in the archive.');
+            console.warn('No beatmaps found, but continuing anyway...');
+            // Don't throw error, just continue with empty beatmap list
         }
 
         availableBeatmaps.sort((a, b) => {
@@ -678,8 +715,18 @@
                 parsed.events.push(line);
             }
         }
+        
         parsed.hitObjects.sort((a, b) => a.time - b.time);
-        parsed.bpm = 0; 
+        parsed.bpm = 0;
+        
+        // Debug logging
+        console.log('Parsed osu file sections:', {
+            general: parsed.general,
+            metadata: parsed.metadata,
+            difficulty: parsed.difficulty,
+            hitObjectsCount: parsed.hitObjects.length
+        });
+        
         return parsed;
     }
 
@@ -1010,6 +1057,523 @@
 
         console.log('Showing results screen...');
         showScreen('results');
+    }
+
+    // Map Search API Functions
+    async function searchMaps() {
+        const query = mapSearchInput.value.trim();
+        if (!query) {
+            alert('Please enter a search term.');
+            return;
+        }
+
+        searchLoading.classList.remove('hidden');
+        searchResults.innerHTML = '';
+        
+        try {
+            console.log('Searching for:', query);
+            
+            // Use nerinyan.moe API which has better search and full metadata
+            const params = new URLSearchParams();
+            params.append('q', query);
+            params.append('limit', '50');
+            
+            // Force mania mode only since we only want 4K mania
+            params.append('mode', '3'); // mania = 3
+            
+            const response = await fetch(`https://api.nerinyan.moe/search?${params.toString()}`);
+            
+            if (!response.ok) {
+                throw new Error(`Search failed: ${response.status} ${response.statusText}`);
+            }
+
+            const results = await response.json();
+            console.log('Search response:', results);
+            
+            // Apply client-side filtering and sorting
+            const filteredResults = filterAndSortSearchResults(results);
+            
+            displaySearchResults(filteredResults);
+            
+        } catch (error) {
+            console.error('Search error:', error);
+            let errorMessage = 'Search failed. ';
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                errorMessage += 'Please check your internet connection.';
+            } else {
+                errorMessage += 'Please try again later.';
+            }
+            searchResults.innerHTML = `<div class="search-error">${errorMessage}</div>`;
+        } finally {
+            searchLoading.classList.add('hidden');
+        }
+    }
+
+    function filterAndSortSearchResults(results) {
+        const statusFilter = document.getElementById('statusFilter').value;
+        
+        // Filter by status if specified
+        let filteredResults = Array.isArray(results) ? results : [];
+        
+        if (statusFilter && statusFilter !== 'all') {
+            const targetStatus = parseInt(statusFilter);
+            filteredResults = filteredResults.filter(set => {
+                const setStatus = set.ranked;
+                return setStatus === targetStatus;
+            });
+            console.log(`Filtered from ${results.length} to ${filteredResults.length} maps for status ${targetStatus}`);
+        }
+        
+        // Sort by: ranked > loved > pending, then by play count (popularity)
+        filteredResults.sort((a, b) => {
+            // Status priority: ranked(1) > approved(2) > loved(4) > qualified(3) > pending(-1) > graveyard(-2)
+            const statusPriority = { 1: 5, 2: 5, 4: 4, 3: 3, '-1': 2, 0: 1, '-2': 0 };
+            const aPriority = statusPriority[a.ranked] || 0;
+            const bPriority = statusPriority[b.ranked] || 0;
+            
+            if (aPriority !== bPriority) {
+                return bPriority - aPriority; // Higher priority first
+            }
+            
+            // If same status, sort by play count (popularity)
+            const aPlayCount = a.play_count || 0;
+            const bPlayCount = b.play_count || 0;
+            return bPlayCount - aPlayCount;
+        });
+        
+        return filteredResults;
+    }
+
+    function displaySearchResults(beatmapsets) {
+        console.log('Displaying search results:', beatmapsets);
+        
+        if (beatmapsets.length === 0) {
+            searchResults.innerHTML = '<div class="search-placeholder"><p>No maps found. Try different search terms.</p></div>';
+            return;
+        }
+
+        const resultsHtml = beatmapsets.map(set => {
+            // nerinyan.moe API structure
+            const id = set.id;
+            const title = set.title;
+            const artist = set.artist;
+            const creator = set.creator;
+            const beatmaps = set.beatmaps || [];
+            const favourites = set.favourite_count || 0;
+            const playCount = set.play_count || 0;
+            const rankedStatus = set.ranked;
+            
+            console.log(`Processing set: ${title} by ${artist}, beatmaps:`, beatmaps);
+            
+            // Filter for 4K mania difficulties only (mode 3, cs = 4)
+            const maniaMaps = beatmaps.filter(b => b.mode_int === 3 && b.cs === 4);
+            const maniaCount = maniaMaps.length;
+            console.log(`4K Mania count for ${title}: ${maniaCount}`);
+            
+            // Skip this beatmapset if it has no 4K mania difficulties
+            if (maniaCount === 0) {
+                return null;
+            }
+            
+            // Get difficulty range for 4K mania maps
+            let difficultyInfo = '';
+            if (maniaCount > 0) {
+                const difficulties = maniaMaps.map(b => b.difficulty_rating || 0);
+                const minDiff = Math.min(...difficulties);
+                const maxDiff = Math.max(...difficulties);
+                const avgBPM = maniaMaps.length > 0 ? Math.round(maniaMaps.reduce((sum, b) => sum + (b.bpm || 0), 0) / maniaMaps.length) : 0;
+                const totalLength = Math.max(...maniaMaps.map(b => b.total_length || 0));
+                
+                difficultyInfo = `
+                    <div class="map-stats">
+                        <span class="stat-item">★${minDiff.toFixed(2)}${minDiff !== maxDiff ? `-${maxDiff.toFixed(2)}` : ''}</span>
+                        <span class="stat-item">${Math.floor(totalLength / 60)}:${(totalLength % 60).toString().padStart(2, '0')}</span>
+                        <span class="stat-item">${avgBPM} BPM</span>
+                        <span class="stat-item">4K</span>
+                        ${favourites > 0 ? `<span class="stat-item">♥${favourites}</span>` : ''}
+                        ${playCount > 0 ? `<span class="stat-item">▶${playCount.toLocaleString()}</span>` : ''}
+                    </div>
+                `;
+            }
+            
+            // Status badge
+            const statusNames = {
+                '-2': 'Graveyard',
+                '-1': 'Pending', 
+                '0': 'WIP',
+                '1': 'Ranked',
+                '2': 'Approved', 
+                '3': 'Qualified',
+                '4': 'Loved'
+            };
+            const statusName = statusNames[rankedStatus] || 'Unknown';
+            const statusClass = rankedStatus === 1 || rankedStatus === 2 ? 'status-ranked' : 
+                               rankedStatus === 4 ? 'status-loved' : 
+                               rankedStatus === 3 ? 'status-qualified' : 
+                               rankedStatus === -1 ? 'status-pending' :
+                               'status-unranked';
+            
+            // Preview URL (can still use osu's preview)
+            const previewUrl = `https://b.ppy.sh/preview/${id}.mp3`;
+            
+            // Cover image
+            const coverUrl = `https://assets.ppy.sh/beatmaps/${id}/covers/card.jpg`;
+            
+            return `
+                <div class="search-result-item" data-set-id="${id}">
+                    <div class="result-cover">
+                        <img src="${coverUrl}" alt="Cover" loading="lazy" onerror="this.style.display='none'">
+                        <div class="preview-overlay">
+                            <button class="preview-button" onclick="togglePreview(${id}, '${previewUrl.replace(/'/g, '\\\'')}')" data-set-id="${id}">
+                                ▶
+                            </button>
+                        </div>
+                    </div>
+                    <div class="result-info">
+                        <div class="result-header">
+                            <h3>${title}</h3>
+                            <span class="status-badge ${statusClass}">${statusName}</span>
+                        </div>
+                        <p class="result-artist">by ${artist}</p>
+                        <p class="result-mapper">mapped by ${creator}</p>
+                        <p class="result-difficulties">${maniaCount} 4K mania difficulties</p>
+                        ${difficultyInfo}
+                    </div>
+                    <div class="result-actions">
+                        <button onclick="downloadMap(${id})" class="download-button">
+                            Load Map
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).filter(item => item !== null).join('');
+
+        console.log('Generated HTML:', resultsHtml);
+        searchResults.innerHTML = resultsHtml;
+    }
+
+    async function downloadMap(beatmapsetId) {
+        try {
+            const downloadButton = document.querySelector(`[data-set-id="${beatmapsetId}"] .download-button`);
+            if (downloadButton) {
+                downloadButton.textContent = 'Loading...';
+                downloadButton.disabled = true;
+            }
+
+            console.log(`Loading beatmapset ${beatmapsetId} directly into player...`);
+
+            // Use CORS proxy to avoid direct download to PC
+            const downloadUrls = [
+                `https://catboy.best/d/${beatmapsetId}`,
+                `https://api.chimu.moe/v1/download/${beatmapsetId}?n=1`
+            ];
+
+            let response;
+            let lastError;
+            
+            for (const url of downloadUrls) {
+                try {
+                    console.log(`Loading from: ${url}`);
+                    
+                    // Fetch with no-store cache to prevent downloads
+                    response = await fetch(url, { 
+                        method: 'GET',
+                        cache: 'no-store',
+                        headers: {
+                            'Accept': 'application/x-osu-beatmap-archive,application/octet-stream,*/*'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        console.log(`Successfully connected to: ${url}`);
+                        const contentType = response.headers.get('content-type');
+                        console.log('Content-Type:', contentType);
+                        
+                        // Check if we got beatmap data
+                        if (contentType && (contentType.includes('application/x-osu-beatmap-archive') || 
+                                          contentType.includes('application/octet-stream') ||
+                                          contentType.includes('application/zip'))) {
+                            console.log('Got valid beatmap data');
+                            break;
+                        } else {
+                            console.log('Invalid content type, trying next source');
+                            response = null;
+                        }
+                    } else {
+                        console.log(`Failed ${url} with status: ${response.status}`);
+                        response = null;
+                    }
+                } catch (error) {
+                    console.log(`Error with ${url}:`, error);
+                    lastError = error;
+                    response = null;
+                }
+            }
+            
+            if (!response) {
+                throw lastError || new Error('Could not load beatmap data');
+            }
+
+            // Convert response to ArrayBuffer for processing (in memory only)
+            const arrayBuffer = await response.arrayBuffer();
+            
+            // Validate beatmap data
+            if (arrayBuffer.byteLength === 0) {
+                throw new Error('Beatmap data is empty');
+            }
+            
+            if (arrayBuffer.byteLength < 1000) {
+                throw new Error('Beatmap data seems incomplete');
+            }
+            
+            console.log(`Loaded ${arrayBuffer.byteLength} bytes of beatmap data`);
+            
+            // Update button state
+            if (downloadButton) {
+                downloadButton.textContent = 'Processing...';
+            }
+            
+            // Process the beatmap data using the existing loadOszFile logic
+            console.log('Processing beatmap data in browser...');
+            
+            // Create a File object from the ArrayBuffer to simulate file upload
+            const blob = new Blob([arrayBuffer], { type: 'application/x-osu-beatmap-archive' });
+            const file = new File([blob], `beatmapset_${beatmapsetId}.osz`, { type: 'application/x-osu-beatmap-archive' });
+            
+            // Use the existing loadOszFile function that already works
+            await loadOszFile(file);
+            
+            // Switch to menu screen to play the loaded map
+            console.log('Beatmap loaded successfully, switching to menu...');
+            hideOverlay(mapSearchOverlay);
+            showScreen('menu');
+            
+            // Update button to show success
+            if (downloadButton) {
+                downloadButton.textContent = '✓ Loaded';
+                downloadButton.disabled = true;
+                downloadButton.style.backgroundColor = '#4caf50';
+                downloadButton.style.color = 'white';
+            }
+            
+            console.log('Beatmap is now ready to play!');
+            
+        } catch (error) {
+            console.error('Failed to load beatmap:', error);
+            
+            const downloadButton = document.querySelector(`[data-set-id="${beatmapsetId}"] .download-button`);
+            if (downloadButton) {
+                downloadButton.textContent = 'Load Failed';
+                downloadButton.disabled = false;
+                downloadButton.style.backgroundColor = '#f44336';
+                
+                // Reset after a few seconds
+                setTimeout(() => {
+                    downloadButton.textContent = 'Try Again';
+                    downloadButton.style.backgroundColor = '';
+                    downloadButton.style.color = '';
+                }, 3000);
+            }
+        }
+    }
+
+    // Make downloadMap available globally
+    window.downloadMap = downloadMap;
+
+    // Preview sound functionality
+    let currentPreviewAudio = null;
+    let currentPreviewButton = null;
+
+    function togglePreview(setId, previewUrl) {
+        const button = document.querySelector(`[data-set-id="${setId}"] .preview-button`);
+        
+        // If clicking the same button that's currently playing
+        if (currentPreviewAudio && currentPreviewButton === button) {
+            if (currentPreviewAudio.paused) {
+                currentPreviewAudio.play();
+                button.textContent = '⏸';
+            } else {
+                currentPreviewAudio.pause();
+                button.textContent = '▶';
+            }
+            return;
+        }
+        
+        // Stop any currently playing preview
+        if (currentPreviewAudio) {
+            currentPreviewAudio.pause();
+            currentPreviewAudio.src = '';
+            currentPreviewAudio = null;
+        }
+        
+        // Reset all preview buttons
+        document.querySelectorAll('.preview-button').forEach(btn => {
+            btn.textContent = '▶';
+            btn.classList.remove('playing');
+        });
+        
+        // Start new preview
+        try {
+            currentPreviewAudio = new Audio(previewUrl);
+            currentPreviewButton = button;
+            
+            currentPreviewAudio.volume = 0.5; // Set volume to 50%
+            currentPreviewAudio.currentTime = 0;
+            
+            button.textContent = '⏸';
+            button.classList.add('playing');
+            
+            currentPreviewAudio.play().catch(error => {
+                console.warn('Preview failed to play:', error);
+                button.textContent = '✗';
+                setTimeout(() => {
+                    button.textContent = '▶';
+                    button.classList.remove('playing');
+                }, 2000);
+            });
+            
+            // Auto-stop after ended
+            currentPreviewAudio.addEventListener('ended', () => {
+                button.textContent = '▶';
+                button.classList.remove('playing');
+                currentPreviewAudio = null;
+                currentPreviewButton = null;
+            });
+            
+            // Handle errors
+            currentPreviewAudio.addEventListener('error', () => {
+                button.textContent = '✗';
+                button.classList.remove('playing');
+                setTimeout(() => {
+                    button.textContent = '▶';
+                }, 2000);
+                currentPreviewAudio = null;
+                currentPreviewButton = null;
+            });
+            
+        } catch (error) {
+            console.error('Error creating preview audio:', error);
+            button.textContent = '✗';
+            setTimeout(() => button.textContent = '▶', 2000);
+        }
+    }
+
+    // Make togglePreview available globally
+    window.togglePreview = togglePreview;
+
+    // Helper function to load OSZ from ArrayBuffer (for downloaded maps)
+    async function loadOszFileFromArrayBuffer(arrayBuffer) {
+        console.log('Loading OSZ from ArrayBuffer...');
+        const zip = new JSZip();
+        const content = await zip.loadAsync(arrayBuffer);
+        console.log('ZIP content loaded from ArrayBuffer.');
+
+        availableBeatmaps = [];
+        audioFilesMap.clear();
+        imageFilesMap.clear();
+        difficultyListContainer.innerHTML = '';
+        startButton.disabled = true;
+        gameAudio.pause();
+        gameAudio.src = '';
+
+        const osuFileEntries = [];
+
+        content.forEach((relativePath, zipEntry) => {
+            if (relativePath.endsWith('.osu')) {
+                osuFileEntries.push(zipEntry);
+            } else if (/\.(mp3|ogg|wav)$/i.test(relativePath)) {
+                audioFilesMap.set(relativePath, zipEntry);
+            } else if (/\.(jpg|jpeg|png|gif|bmp)$/i.test(relativePath)) {
+                imageFilesMap.set(relativePath, zipEntry);
+            }
+        });
+
+        console.log(`Found ${osuFileEntries.length} .osu files.`);
+
+        for (const zipEntry of osuFileEntries) {
+            try {
+                const osuFileContent = await zipEntry.async('text');
+                console.log(`Processing ${zipEntry.name}...`);
+                
+                const beatmap = parseOsuFile(osuFileContent);
+                if (!beatmap) {
+                    console.log(`Failed to parse ${zipEntry.name}`);
+                    continue;
+                }
+                
+                // Check if this is a mania beatmap (Mode 3)
+                const mode = parseInt(beatmap.general?.Mode || beatmap.metadata?.Mode || 0);
+                
+                console.log(`Mode: ${mode}, HitObjects: ${beatmap.hitObjects?.length || 0}`);
+                
+                // Load all mania beatmaps (Mode 3) regardless of key count
+                if (beatmap.hitObjects && beatmap.hitObjects.length > 0 && mode === 3) {
+                    availableBeatmaps.push(beatmap);
+                    console.log(`✓ Added mania beatmap: ${beatmap.metadata.Title} [${beatmap.metadata.Version}]`);
+                } else {
+                    console.log(`✗ Skipped non-mania beatmap: ${beatmap.metadata.Title} [${beatmap.metadata.Version}] (Mode: ${mode})`);
+                }
+            } catch (error) {
+                console.error(`Error parsing ${zipEntry.name}:`, error);
+            }
+        }
+
+        console.log(`Found ${availableBeatmaps.length} mania beatmaps`);
+
+        if (availableBeatmaps.length === 0) {
+            console.warn('No mania beatmaps found, loading any beatmap...');
+            
+            // As last fallback, load any beatmap
+            for (const zipEntry of osuFileEntries) {
+                try {
+                    const osuFileContent = await zipEntry.async('text');
+                    const beatmap = parseOsuFile(osuFileContent);
+                    
+                    if (beatmap && beatmap.hitObjects && beatmap.hitObjects.length > 0) {
+                        availableBeatmaps.push(beatmap);
+                        console.log(`Added any beatmap: ${beatmap.metadata.Title} [${beatmap.metadata.Version}]`);
+                        break; // Just add the first working beatmap
+                    }
+                } catch (error) {
+                    console.error(`Error in fallback parsing:`, error);
+                }
+            }
+        }
+
+        availableBeatmaps.sort((a, b) => {
+            const starsA = parseFloat(a.metadata.Stars) || 0;
+            const starsB = parseFloat(b.metadata.Stars) || 0;
+            return starsA - starsB;
+        });
+
+        console.log(`Total valid beatmaps: ${availableBeatmaps.length}`);
+        
+        // Clear and populate difficulty list
+        difficultyListContainer.innerHTML = '';
+        availableBeatmaps.forEach((bm, index) => {
+            const difficultyItem = document.createElement('div');
+            difficultyItem.classList.add('difficulty-item');
+            difficultyItem.dataset.index = index;
+            difficultyItem.textContent = bm.name;
+            difficultyListContainer.appendChild(difficultyItem);
+        });
+
+        if (availableBeatmaps.length > 0) {
+            console.log('Selecting first available beatmap difficulty.');
+            difficultyListContainer.querySelector('.difficulty-item').click();
+        }
+
+        const backgroundImagePath = getMapBackgroundImagePath();
+        if (backgroundImagePath) {
+            await setMapBackgroundImage(backgroundImagePath);
+        }
+
+        const firstBeatmap = availableBeatmaps[0];
+        mapTitle.textContent = firstBeatmap.metadata.Title || 'Unknown Title';
+        
+        showScreen('menu');
+        updateScrollSpeedDisplay(); 
+        updateMapRateDisplay();
     }
 
     // Initial state setup

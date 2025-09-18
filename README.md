@@ -8,7 +8,7 @@
 </table>
 
 
-**WebOsz** is a sleek browser-based rhythm game inspired by the popular `osu!mania` game mode. Built with modern web technologies, it lets you play your favorite beatmaps directly in your browser by loading `.osz` files — no installation needed.
+**WebOsz** is a sleek browser-based rhythm game inspired by the popular `osu!mania` game mode. Built with modern web technologies, it lets you play your favorite beatmaps directly in your browser by loading `.osz` files or searching for maps online — no installation needed.
 
 ## ✨ Features
 
@@ -16,8 +16,14 @@
   Simply open `index.html` in your browser and start playing — no build tools or servers needed.  
   Or use this link https://kaanreal.github.io/WebOsz/
 
+- **Online Map Search & Download**  
+  Search and instantly load beatmaps from online sources without downloading files to your computer.
+
 - **`.osz` File Support**  
   Load your existing `osu!mania` 4-key beatmap archives effortlessly.
+
+- **4K Mania Focus**  
+  Optimized specifically for 4-key osu!mania gameplay.
 
 - **Customizable Gameplay**  
   - Adjustable scroll speed  
