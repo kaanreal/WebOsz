@@ -1,5 +1,12 @@
+/**
+ * WebOsz - Browser-based osu!mania rhythm game
+ * 
+ * main.css - Core styling for WebOsz
+ * Defines the visual appearance, animations, and responsive layout
+ */
+
 :root {
-        /* New Color Palette - More refined and vibrant */
+        /* Color Palette - Refined and vibrant game theme */
         --primary-bg: #0a0a0a; /* Even darker background */
         --secondary-bg: #1a1a1a; /* Darker for containers */
         --accent-color: #7b2cbf; /* Deeper Blue Violet */
@@ -367,6 +374,8 @@
     .navbar-slider {
         width: 100%;
         -webkit-appearance: none;
+        appearance: none;
+        -moz-appearance: none;
         height: 6px;
         background: var(--input-bg);
         border-radius: 3px;
@@ -382,6 +391,7 @@
     .navbar-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
+        -moz-appearance: none;
         width: 16px;
         height: 16px;
         border-radius: 50%;
@@ -423,6 +433,7 @@
     .navbar-checkbox {
         -webkit-appearance: none;
         appearance: none;
+        -moz-appearance: none;
         width: 20px;
         height: 20px;
         border: 2px solid var(--input-border);

@@ -1,3 +1,10 @@
+/**
+ * WebOsz - Browser-based osu!mania rhythm game
+ * 
+ * main.js - Core game logic for WebOsz
+ * Handles beatmap loading, game mechanics, scoring, and UI interactions
+ */
+
 // DOM Elements
     const oszFileInput = document.getElementById('oszFileInput');
     const startScreenFileName = document.getElementById('startScreenFileName');
