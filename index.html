@@ -70,7 +70,6 @@
                 <div class="map-background-overlay" id="mapBackgroundOverlay"></div>
                 <div class="menu-header">
                     <button id="backToStartButton" class="menu-back-button">Back to Start</button>
-                    <button id="customizeButton" class="menu-customize-button">Customize</button>
                 </div>
                 <div class="menu-content">
                     <h2 class="map-title" id="mapTitle">Select a Difficulty</h2>
@@ -83,8 +82,8 @@
                 <div class="navbar">
                     <div class="navbar-item">
                         <label for="scrollSpeedInput" class="navbar-label">Scroll Speed:</label>
-                        <input type="range" id="scrollSpeedInput" min="1" max="40" value="10.0" step="0.1" class="navbar-slider">
-                        <span id="scrollSpeedValue" class="navbar-value">10.0x</span>
+                        <input type="range" id="scrollSpeedInput" min="10" max="40" value="20.0" step="1" class="navbar-slider">
+                        <span id="scrollSpeedValue" class="navbar-value">20</span>
                     </div>
                     <div class="navbar-item">
                         <label for="mapRateInput" class="navbar-label">Map Rate:</label>
@@ -111,35 +110,7 @@
                 </div>
             </div>
 
-            <!-- Customize Overlay -->
-            <div class="customize-overlay hidden" id="customizeOverlay">
-                <div class="overlay-content">
-                    <h2 class="overlay-title">Customize Colors</h2>
-                    <div class="color-grid" id="colorGrid">
-                        <div class="color-item">
-                            <label for="accentColorInput" class="color-label">Accent Color:</label>
-                            <input type="color" id="accentColorInput" class="color-input">
-                        </div>
-                        <div class="color-item">
-                            <label for="noteColor1Input" class="color-label">Note Color 1:</label>
-                            <input type="color" id="noteColor1Input" class="color-input">
-                        </div>
-                        <div class="color-item">
-                            <label for="noteColor2Input" class="color-label">Note Color 2:</label>
-                            <input type="color" id="noteColor2Input" class="color-input">
-                        </div>
-                        <div class="color-item">
-                            <label for="noteColor3Input" class="color-label">Note Color 3:</label>
-                            <input type="color" id="noteColor3Input" class="color-input">
-                        </div>
-                        <div class="color-item">
-                            <label for="noteColor4Input" class="color-label">Note Color 4:</label>
-                            <input type="color" id="noteColor4Input" class="color-input">
-                        </div>
-                    </div>
-                    <button class="overlay-close-button" id="closeCustomizeOverlay">Close</button>
-                </div>
-            </div>
+
 
             <!-- Game Screen -->
             <div class="game-screen hidden" id="gameScreen">
@@ -147,6 +118,7 @@
                     <button id="backButton" class="game-back-button">Back</button>
                 </div>
                 <div class="game-area">
+                    <div class="game-background" id="gameBackground"></div>
                     <div class="accuracy-display-overlay"><span id="liveAccuracyDisplay">0.00%</span></div>
                     <div class="combo-display-overlay"><span id="combo">0</span></div>
                     <div class="note-column" id="note-column-0"></div>
@@ -160,6 +132,7 @@
                         <div class="key-button" id="key-2"></div>
                         <div class="key-button" id="key-3"></div>
                     </div>
+                    <div class="ur-bar" id="urBar"></div>
                 </div>
                 <div class="song-progress-bar">
                     <div class="progress-fill" id="songProgressBarFill"></div>

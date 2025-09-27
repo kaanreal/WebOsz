@@ -15,7 +15,7 @@
         --overlay-bg: rgba(0, 0, 0, 0.85); /* Darker for overlays */
 
         /* Playfield Scale Variable */
-        --playfield-scale: 1.3; /* Adjust this value to change overall playfield size */
+        --playfield-scale: 1.3; /* Increase overall playfield size */
 
         /* Note Colors (can be customized further) */
         --note-color-1: #00c0ff; /* Brighter Deep Sky Blue */
@@ -24,18 +24,19 @@
         --note-color-4: #ffcc00; /* Gold */
 
         /* Judgment Colors */
-        --judgment-max: #ffe033; /* Brighter Yellow */
-        --judgment-300: #4caf50; /* Green */
-        --judgment-100: #2196f3; /* Blue */
-        --judgment-50: #ff9800; /* Orange */
-        --judgment-miss: #f44336; /* Red */
+        --judgment-perfect: #ffffff; /* White */
+        --judgment-max: #ffffff; /* White */
+        --judgment-300: #ffffff; /* White */
+        --judgment-100: #ffffff; /* White */
+        --judgment-50: #ffffff; /* White */
+        --judgment-miss: #ff6666; /* Light Red */
 
         /* Game Area Dimensions - scaled by --playfield-scale */
-        --lane-width: calc(80px * var(--playfield-scale));
-        --note-size: calc(70px * var(--playfield-scale));
-        --game-area-height: calc(600px * var(--playfield-scale));
-        --key-button-size: calc(70px * var(--playfield-scale));
-        --judgment-offset: calc(50px * var(--playfield-scale)); /* Distance from bottom of game area to receptor center */
+        --lane-width: calc(80px * var(--playfield-scale)); /* Etwas breiter für mehr Abstand */
+        --note-size: calc(70px * var(--playfield-scale)); /* Größere Notes */
+        --game-area-height: calc(100vh - 80px);
+        --key-button-size: calc(70px * var(--playfield-scale)); /* Größere Receptoren */
+        --judgment-offset: calc(70px * var(--playfield-scale)); /* Angepasste Position der Receptoren (tiefer) */
 
         /* Compactness adjustments */
         --menu-section-padding: 15px;
@@ -61,17 +62,13 @@
 
     /* This is the container for the main game, NOT the start screen */
     .game-container {
-        background-color: var(--secondary-bg);
-        border-radius: 20px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
-        padding: 25px;
+        background-color: transparent;
         text-align: center;
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
         position: relative;
         overflow: hidden;
-        border: 1px solid var(--border-color);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -250,7 +247,7 @@
         padding-bottom: 20px;
     }
 
-    .menu-back-button, .menu-customize-button {
+    .menu-back-button {
         padding: 8px 15px;
         font-size: 0.9em;
         border-radius: 6px;
@@ -261,7 +258,7 @@
         transition: all 0.2s ease;
     }
 
-    .menu-back-button:hover, .menu-customize-button:hover {
+    .menu-back-button:hover {
         background-color: #555;
         transform: translateY(-2px);
     }
@@ -488,8 +485,8 @@
         box-shadow: 0 0 25px rgba(138, 43, 226, 0.8);
     }
 
-    /* Keybinds & Customize Overlay Animations */
-    .keybinds-overlay, .customize-overlay {
+    /* Keybinds Overlay Animations */
+    .keybinds-overlay {
         background-color: var(--overlay-bg);
         backdrop-filter: blur(8px);
         justify-content: center;
@@ -507,7 +504,7 @@
         transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     }
 
-    .keybinds-overlay.visible, .customize-overlay.visible {
+    .keybinds-overlay.visible {
         opacity: 1;
         visibility: visible;
         transition: opacity 0.3s ease, visibility 0s linear 0s;
@@ -530,7 +527,7 @@
         transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
     }
 
-    .keybinds-overlay.visible .overlay-content, .customize-overlay.visible .overlay-content {
+    .keybinds-overlay.visible .overlay-content {
         transform: scale(1) translateY(0);
         opacity: 1;
     }
@@ -541,14 +538,14 @@
         margin-bottom: 10px;
     }
 
-    .keybind-grid, .color-grid {
+    .keybind-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
         width: 100%;
     }
 
-    .keybind-item, .color-item {
+    .keybind-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -558,7 +555,7 @@
         border: 1px solid var(--input-border);
     }
 
-    .keybind-label, .color-label {
+    .keybind-label {
         font-size: 1em;
         color: var(--text-color-light);
     }
@@ -612,38 +609,7 @@
         transform: translateY(-2px);
     }
 
-    /* Customize Overlay */
-    .color-input {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        width: 40px;
-        height: 25px;
-        border: none;
-        background: none;
-        cursor: pointer;
-        padding: 0;
-        border-radius: 4px;
-        overflow: hidden;
-    }
 
-    .color-input::-webkit-color-swatch-wrapper {
-        padding: 0;
-    }
-
-    .color-input::-webkit-color-swatch {
-        border: 1px solid var(--input-border);
-        border-radius: 4px;
-    }
-
-    .color-input::-moz-color-swatch-wrapper {
-        padding: 0;
-    }
-
-    .color-input::-moz-color-swatch {
-        border: 1px solid var(--input-border);
-        border-radius: 4px;
-    }
 
 
     /* Game Screen */
@@ -652,24 +618,31 @@
         flex-direction: column;
         align-items: center;
         width: 100%;
+        height: 100vh;
         position: relative;
-        padding-top: 15px;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
     }
 
     .game-header {
         width: 100%;
         display: flex;
         justify-content: flex-start;
-        padding-bottom: 10px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 20;
+        padding: 10px;
     }
 
     .game-back-button {
-        padding: 8px 15px;
-        font-size: 0.9em;
-        border-radius: 6px;
-        background-color: #3a3a3a;
+        padding: 5px 10px;
+        font-size: 0.8em;
+        border-radius: 4px;
+        background-color: rgba(58, 58, 58, 0.7);
         color: var(--text-color-light);
-        border: 1px solid #555;
+        border: none;
         cursor: pointer;
         transition: all 0.2s ease;
     }
@@ -682,14 +655,25 @@
     .game-area {
         position: relative;
         width: calc(var(--lane-width) * 4);
-        height: var(--game-area-height);
-        background-color: #000000;
-        border-radius: 15px;
-        overflow: hidden; /* Ensures notes disappear when they fall out */
-        border: 2px solid var(--border-color);
+        height: 100vh; /* Full viewport height */
+        background-color: transparent; /* Completely transparent background */
+        overflow: visible; /* Allow notes to be visible beyond the area */
         display: flex;
         justify-content: space-around;
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+    
+    .game-background {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100vw;
+        height: 100vh;
+        background-size: cover;
+        background-position: center;
+        filter: blur(3px) brightness(0.25);
+        opacity: 0.6;
+        z-index: -1;
     }
 
     /* Note Columns */
@@ -697,11 +681,8 @@
         position: relative;
         width: var(--lane-width); /* Set lane width */
         height: 100%;
-        overflow: hidden;
-        border-right: 1px solid rgba(255, 255, 255, 0.05); /* Subtle lane separator */
-    }
-    .note-column:last-child {
-        border-right: none; /* No border on the last lane */
+        overflow: visible; /* Allow notes to be visible */
+        background-color: transparent; /* Completely transparent background */
     }
 
     /* Notes */
@@ -709,9 +690,12 @@
         position: absolute;
         width: var(--note-size);
         height: var(--note-size);
-        border-radius: 50%;
         z-index: 2; /* Ensure notes are above other elements if needed */
-        /* Removed transition for background-color, as notes should just fall off */
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        left: 50%;
+        transform: translateX(-50%); /* Center the note in its column */
     }
 
     /* New class for notes that have been hit or missed - makes them instantly invisible */
@@ -720,115 +704,212 @@
         transition: none; /* No transition for instant disappearance */
     }
 
-    /* Lane-specific note colors and shadows */
+    /* Lane-specific note images */
     .note.note-column-0 {
-        background-color: var(--note-color-1);
-        box-shadow: 0 0 15px var(--note-color-1); /* Glow effect */
+        background-image: url('../assets/arrow-left-normal.png');
     }
 
     .note.note-column-1 {
-        background-color: var(--note-color-2);
-        box-shadow: 0 0 15px var(--note-color-2); /* Glow effect */
+        background-image: url('../assets/arrow-down-normal.png');
     }
 
     .note.note-column-2 {
-        background-color: var(--note-color-3);
-        box-shadow: 0 0 15px var(--note-color-3); /* Glow effect */
+        background-image: url('../assets/arrow-up-normal.png');
     }
 
     .note.note-column-3 {
-        background-color: var(--note-color-4);
-        box-shadow: 0 0 15px var(--note-color-4); /* Glow effect */
+        background-image: url('../assets/arrow-right-normal.png');
     }
 
 
     /* Accuracy and Combo Overlays */
     .accuracy-display-overlay {
         position: absolute;
-        top: 5%;
+        top: 15px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 1.6em;
-        font-weight: 800;
-        color: var(--text-color-light);
-        text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        font-size: 1.4em;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 0 5px rgba(0,0,0,0.8);
         z-index: 10;
     }
 
     .combo-display-overlay {
         position: absolute;
-        top: 45%;
+        top: 25%;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 3.5em;
-        font-weight: 800;
-        color: var(--text-color-light);
-        text-shadow: 0 0 15px rgba(0,0,0,0.8);
+        font-size: 3.2em;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 0 10px rgba(0,0,0,0.8);
         z-index: 10;
+    }
+    
+    /* UR Bar Styling */
+    .ur-bar {
+        position: absolute;
+        bottom: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(var(--lane-width) * 4);
+        height: 8px;
+        background-color: rgba(30, 30, 30, 0.7);
+        border-radius: 4px;
+        z-index: 10;
+        overflow: hidden;
+    }
+    
+    /* UR Bar Ticks - diese werden dynamisch hinzugefügt */
+    .ur-tick {
+        position: absolute;
+        width: 4px;
+        height: 100%;
+        top: 0;
+        transform: translateX(-50%);
+        opacity: 0.8;
+        transition: opacity 1s ease-out;
+    }
+    
+    .ur-tick.perfect {
+        background-color: rgb(255, 240, 130);
+    }
+    
+    .ur-tick.early {
+        background-color: rgb(135, 206, 235);
+    }
+    
+    .ur-tick.late {
+        background-color: rgb(255, 165, 0);
+    }
+    
+    /* Center line for reference */
+    .ur-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        height: 100%;
+        width: 1px;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .judgment-line {
+        position: absolute;
+        bottom: calc(var(--judgment-offset) + var(--note-size) * 0.5);
+        width: 100%;
+        height: 0;
+        background-color: transparent;
+        z-index: 1;
     }
 
     .key-display {
         position: absolute;
-        bottom: var(--judgment-offset);
+        bottom: 10%;
         left: 0;
         width: 100%;
         display: flex;
         justify-content: space-around;
-        padding-bottom: 0px;
+        padding-bottom: 0;
+        z-index: 2;
     }
 
     .key-button {
-        width: var(--key-button-size);
-        height: var(--key-button-size);
-        border-radius: 50%;
-        border: 2px solid var(--border-color);
-        box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
-        background-color: rgba(255, 255, 255, 0.05); /* Subtle fill */
-        transition: background-color 0.1s ease, box-shadow 0.1s ease;
+        width: var(--note-size);
+        height: var(--note-size);
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        transition: all 0.1s ease;
     }
 
-    .key-button.active {
-        background-color: rgba(138, 43, 226, 0.4);
-        box-shadow: 0 0 25px var(--accent-color), inset 0 0 12px var(--accent-color);
+    #key-0 {
+        background-image: url('../assets/arrow-left-idle.png');
+    }
+    
+    #key-1 {
+        background-image: url('../assets/arrow-down-idle.png');
+    }
+    
+    #key-2 {
+        background-image: url('../assets/arrow-up-idle.png');
+    }
+    
+    #key-3 {
+        background-image: url('../assets/arrow-right-idle.png');
     }
 
-    /* Judgment Text */
+    #key-0.active {
+        background-image: url('../assets/arrow-left-pressed.png');
+        filter: brightness(1.5);
+    }
+    
+    #key-1.active {
+        background-image: url('../assets/arrow-down-pressed.png');
+        filter: brightness(1.5);
+    }
+    
+    #key-2.active {
+        background-image: url('../assets/arrow-up-pressed.png');
+        filter: brightness(1.5);
+    }
+    
+    #key-3.active {
+        background-image: url('../assets/arrow-right-pressed.png');
+        filter: brightness(1.5);
+    }
+
+    /* Judgment Images */
     .judgment-text {
         position: absolute;
-        top: calc(45% + 3.5em + 10px); /* Below combo, adjusted for font size */
+        top: 37%; /* Center in the playfield */
         left: 50%;
-        transform: translateX(-50%);
-        font-size: 2em;
-        font-weight: 700;
+        transform: translateX(-50%) scale(0.7);
+        width: 160px;
+        height: 80px;
         opacity: 1;
-        transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
         z-index: 11;
         pointer-events: none;
+        animation: judgment-anim 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards; /* Schnellere osu!mania Animation */
+    }
+    
+    @keyframes judgment-anim {
+        0% { transform: translateX(-50%) scale(0.5); }
+        50% { transform: translateX(-50%) scale(1.1); }
+        100% { transform: translateX(-50%) scale(1.0); }
     }
 
-    .judgment-max { color: var(--judgment-max); text-shadow: 0 0 10px var(--judgment-max); }
-    .judgment-300 { color: var(--judgment-300); text-shadow: 0 0 10px var(--judgment-300); }
-    .judgment-100 { color: var(--judgment-100); text-shadow: 0 0 10px var(--judgment-100); }
-    .judgment-50 { color: var(--judgment-50); text-shadow: 0 0 10px var(--judgment-50); }
-    .judgment-miss { color: var(--judgment-miss); text-shadow: 0 0 10px var(--judgment-miss); }
+    .judgment-max { background-image: url('../assets/judgement-max.png'); }
+    .judgment-300 { background-image: url('../assets/judgement-300.png'); }
+    .judgment-200 { background-image: url('../assets/judgement-200.png'); }
+    .judgment-100 { background-image: url('../assets/judgement-100.png'); }
+    .judgment-50 { background-image: url('../assets/judgement-50.png'); }
+    .judgment-miss { background-image: url('../assets/judgement-miss.png'); }
+    .judgment-ghost { opacity: 0.3; }
 
     /* Song Progress Bar */
     .song-progress-bar {
-        width: calc(var(--lane-width) * 4);
-        height: 10px;
-        margin-top: 15px;
-        background-color: #3a3a3a;
-        border-radius: 5px;
+        width: 100vw;
+        height: 5px;
+        margin-top: 0;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(30, 30, 30, 0.7);
         overflow: hidden;
-        border: 1px solid var(--border-color);
+        z-index: 5;
     }
 
     .progress-fill {
         height: 100%;
         width: 0%;
         background-color: var(--accent-color);
-        border-radius: 5px;
         transition: width 0.1s linear;
+        box-shadow: 0 0 10px var(--accent-light);
     }
 
     /* Results Screen */
@@ -942,7 +1023,7 @@
             padding-bottom: 15px;
         }
 
-        .menu-back-button, .menu-customize-button {
+        .menu-back-button {
             padding: 7px 12px;
             font-size: 0.8em;
         }
@@ -1004,7 +1085,7 @@
             font-size: 0.8em;
         }
 
-        .keybinds-overlay, .customize-overlay {
+        .keybinds-overlay {
             transform: scale(0.98);
         }
 
@@ -1017,15 +1098,15 @@
             font-size: 1.6em;
         }
 
-        .keybind-grid, .color-grid {
+        .keybind-grid {
             gap: 10px;
         }
 
-        .keybind-item, .color-item {
+        .keybind-item {
             padding: 8px 12px;
         }
 
-        .keybind-label, .color-label {
+        .keybind-label {
             font-size: 0.9em;
         }
 
@@ -1062,8 +1143,8 @@
         }
 
         .song-progress-bar {
-            margin-top: 12px;
-            height: 8px;
+            margin-top: 0;
+            height: 5px;
         }
 
         .results-title {
@@ -1125,7 +1206,7 @@
             padding-bottom: 10px;
         }
 
-        .menu-back-button, .menu-customize-button {
+        .menu-back-button {
             padding: 6px 10px;
             font-size: 0.75em;
         }
@@ -1242,8 +1323,8 @@
         }
 
         .song-progress-bar {
-            margin-top: 10px;
-            height: 6px;
+            margin-top: 0;
+            height: 4px;
         }
 
         .results-title {

@@ -94,7 +94,7 @@
     let animationFrameId = null;
     let isPlaying = false;
     let audioLeadIn = 0;
-    let currentScrollSpeed = parseFloat(localStorage.getItem('scrollSpeed') || scrollSpeedInput.value);
+    let currentScrollSpeed = parseFloat(localStorage.getItem('scrollSpeed') || 20);
     let currentMapRate = parseFloat(localStorage.getItem('mapRate') || mapRateInput.value);
 
     // Keybind State
@@ -104,17 +104,19 @@
 
     // Game Constants
     const PLAYFIELD_SCALE = 1.3;
-    const BASE_FALL_SPEED_PX_PER_MS = 0.1; 
+    const BASE_FALL_SPEED_PX_PER_MS = 0.05; // Halbiert, um mit osu!mania-Scrollspeed kompatibel zu sein
     const GAME_AREA_HEIGHT = 600 * PLAYFIELD_SCALE;
     const RECEPTOR_HEIGHT = 70 * PLAYFIELD_SCALE;
-    const JUDGMENT_OFFSET_FROM_RECEPTOR_BOTTOM = 50 * PLAYFIELD_SCALE;
+    const JUDGMENT_OFFSET_FROM_RECEPTOR_BOTTOM = 70 * PLAYFIELD_SCALE; // Angepasst an die neue --judgment-offset Variable
 
     let od = 8; 
 
-    const HIT_WINDOW_MAX_MS = 16.5;
-    const HIT_WINDOW_300_MS = 22;
-    const HIT_WINDOW_100_MS = 43;
-    const HIT_WINDOW_50_MS = 64;
+    // OD8 osu!mania timing windows
+    const HIT_WINDOW_MAX_MS = 16;    // Perfect/MAX (±16ms)
+    const HIT_WINDOW_300_MS = 34;    // Great/300 (±34ms) 
+    const HIT_WINDOW_100_MS = 67;    // Good/100 (±67ms)
+    const HIT_WINDOW_50_MS = 97;     // Bad/50 (±97ms)
+    // Miss is anything beyond ±97ms
 
     // --- Animation Helpers ---
     function showOverlay(overlay) {
@@ -231,21 +233,7 @@
     }
 
     function loadCustomColors() {
-        const accent = localStorage.getItem('customAccentColor');
-        const note1 = localStorage.getItem('customNoteColor1');
-        const note2 = localStorage.getItem('customNoteColor2');
-        const note3 = localStorage.getItem('customNoteColor3');
-        const note4 = localStorage.getItem('customNoteColor4');
-
-        if (accent) document.documentElement.style.setProperty('--accent-color', accent);
-        if (note1) document.documentElement.style.setProperty('--note-color-1', note1);
-        if (note2) document.documentElement.style.setProperty('--note-color-2', note2);
-        if (note3) document.documentElement.style.setProperty('--note-color-3', note3);
-        if (note4) document.documentElement.style.setProperty('--note-color-4', note4);
-
-        if (accentColorInput && accent) accentColorInput.value = accent;
-        if (noteColor1Input && note1) noteColor1Input.value = note1;
-        if (noteColor2Input && note2) noteColor2Input.value = note2;
+        // Customize-Funktionalität wurde entfernt
         if (noteColor3Input && note3) noteColor3Input.value = note3;
         if (noteColor4Input && note4) noteColor4Input.value = note4;
     }
@@ -370,7 +358,8 @@
 
 
     scrollSpeedInput.addEventListener('input', () => {
-        currentScrollSpeed = parseFloat(scrollSpeedInput.value);
+        // Scrollspeed als Ganzzahl verwenden, wie in osu!mania
+        currentScrollSpeed = parseInt(scrollSpeedInput.value, 10);
         localStorage.setItem('scrollSpeed', currentScrollSpeed);
         updateScrollSpeedDisplay();
     });
@@ -378,19 +367,19 @@
     scrollSpeedValueDisplay.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'number';
-        input.step = '0.1';
+        input.step = '1'; // Nur ganzzahlige Schritte erlauben
         input.min = scrollSpeedInput.min;
         input.max = scrollSpeedInput.max;
-        input.value = currentScrollSpeed;
+        input.value = Math.round(currentScrollSpeed); // Auf ganze Zahl runden
         input.classList.add('navbar-value-input');
 
         scrollSpeedValueDisplay.replaceWith(input);
         input.focus();
 
         const handleInputEnd = () => {
-            let newValue = parseFloat(input.value);
-            if (isNaN(newValue) || newValue < parseFloat(scrollSpeedInput.min) || newValue > parseFloat(scrollSpeedInput.max)) {
-                newValue = parseFloat(scrollSpeedInput.value);
+            let newValue = parseInt(input.value, 10);
+            if (isNaN(newValue) || newValue < parseInt(scrollSpeedInput.min, 10) || newValue > parseInt(scrollSpeedInput.max, 10)) {
+                newValue = parseInt(scrollSpeedInput.value, 10);
             }
             currentScrollSpeed = newValue;
             scrollSpeedInput.value = newValue;
@@ -472,24 +461,7 @@
         hideOverlay(keybindsOverlay);
     });
 
-    customizeButton.addEventListener('click', () => {
-        showOverlay(customizeOverlay);
-        accentColorInput.value = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
-        noteColor1Input.value = getComputedStyle(document.documentElement).getPropertyValue('--note-color-1');
-        noteColor2Input.value = getComputedStyle(document.documentElement).getPropertyValue('--note-color-2');
-        noteColor3Input.value = getComputedStyle(document.documentElement).getPropertyValue('--note-color-3');
-        noteColor4Input.value = getComputedStyle(document.documentElement).getPropertyValue('--note-color-4');
-    });
 
-    closeCustomizeOverlayButton.addEventListener('click', () => {
-        hideOverlay(customizeOverlay);
-    });
-
-    accentColorInput.addEventListener('input', (e) => saveCustomColor('--accent-color', e.target.value));
-    noteColor1Input.addEventListener('input', (e) => saveCustomColor('--note-color-1', e.target.value));
-    noteColor2Input.addEventListener('input', (e) => saveCustomColor('--note-color-2', e.target.value));
-    noteColor3Input.addEventListener('input', (e) => saveCustomColor('--note-color-3', e.target.value));
-    noteColor4Input.addEventListener('input', (e) => saveCustomColor('--note-color-4', e.target.value));
 
     // Map Search Event Listeners
     searchMapsButton.addEventListener('click', () => {
@@ -731,7 +703,8 @@
     }
 
     function updateScrollSpeedDisplay() {
-        scrollSpeedValueDisplay.textContent = `${currentScrollSpeed.toFixed(1)}x`;
+        // Scrollspeed als Ganzzahl anzeigen, wie in osu!mania
+        scrollSpeedValueDisplay.textContent = `${Math.round(currentScrollSpeed)}`;
     }
 
     function updateMapRateDisplay() {
@@ -750,6 +723,19 @@
         }
 
         showScreen('game');
+        
+        // Set game background from map background
+        const backgroundFilename = currentBeatmap.events.find(e => e.startsWith('0,0,"') && e.endsWith('",0,0'))?.split(',')[2].replace(/"/g, '');
+        if (backgroundFilename && imageFilesMap.has(backgroundFilename)) {
+            try {
+                imageFilesMap.get(backgroundFilename).async('blob').then(imageBlob => {
+                    gameBackground.style.backgroundImage = `url(${URL.createObjectURL(imageBlob)})`;
+                });
+            } catch (error) {
+                console.error('Error setting game background:', error);
+                gameBackground.style.backgroundImage = 'none';
+            }
+        }
 
         resetGame();
 
@@ -819,12 +805,21 @@
             }
         });
         document.querySelectorAll('.judgment-text').forEach(el => el.remove());
+        
+        // UR-Bar zurücksetzen
+        const urBar = document.getElementById('urBar');
+        if (urBar) {
+            while (urBar.firstChild) {
+                urBar.removeChild(urBar.firstChild);
+            }
+        }
     }
 
     function gameLoop(currentTime) {
         if (!isPlaying) return;
 
         const audioTime = gameAudio.currentTime * 1000;
+        // Konstante Scrollgeschwindigkeit unabhängig von der Map-Rate
         const effectiveNoteFallSpeed = BASE_FALL_SPEED_PX_PER_MS * currentScrollSpeed;
 
         if (gameAudio.duration) {
@@ -832,6 +827,7 @@
             songProgressBarFill.style.width = `${progress}%`;
         }
 
+        // AudioLeadIn muss mit der Map-Rate angepasst werden, aber die Scroll-Geschwindigkeit bleibt unverändert
         if (audioLeadIn > 0 && audioTime < (audioLeadIn / currentMapRate) && gameAudio.readyState >= 2) {
             gameAudio.currentTime = (audioLeadIn / currentMapRate) / 1000;
             console.log(`Skipping audio to ${audioLeadIn}ms (effective ${audioLeadIn / currentMapRate}ms)`);
@@ -858,6 +854,7 @@
 
             if (!note.hit && !note.missed && audioTime > note.time + HIT_WINDOW_50_MS) {
                 note.missed = true;
+                note.element.classList.add('hit-or-missed');
                 resetCombo();
                 countMiss++;
                 displayJudgment('MISS', 'judgment-miss');
@@ -899,13 +896,17 @@
         const audioTime = gameAudio.currentTime * 1000;
         let bestHitNote = null;
         let bestTimeDifference = Infinity;
+        let timingMs = 0;
 
         for (const note of activeNotes) {
             if (note.lane === laneIndex && !note.hit && !note.missed) {
+                // Berechne den Zeitunterschied zwischen Audio und Note, unter Berücksichtigung der Receptor-Position
                 const timeDifference = Math.abs(note.time - audioTime);
                 if (timeDifference <= HIT_WINDOW_50_MS && timeDifference < bestTimeDifference) {
                     bestTimeDifference = timeDifference;
                     bestHitNote = note;
+                    // Berechne, ob der Hit zu früh oder zu spät war
+                    timingMs = Math.round(audioTime - note.time);
                 }
             }
         }
@@ -920,58 +921,95 @@
             if (hitDelta <= HIT_WINDOW_MAX_MS) {
                 judgmentText = 'MAX';
                 judgmentClass = 'judgment-max';
-                score += 300;
+                score += 320; // OD8 osu!mania: MAX gibt 320 Punkte
                 combo++;
                 countMax++;
             } else if (hitDelta <= HIT_WINDOW_300_MS) {
                 judgmentText = '300';
                 judgmentClass = 'judgment-300';
-                score += 300;
+                score += 300; // OD8 osu!mania: 300 gibt 300 Punkte
                 combo++;
                 count300++;
             } else if (hitDelta <= HIT_WINDOW_100_MS) {
                 judgmentText = '100';
                 judgmentClass = 'judgment-100';
-                score += 100;
+                score += 200; // OD8 osu!mania: 100 gibt 200 Punkte
                 combo++;
                 count100++;
             } else if (hitDelta <= HIT_WINDOW_50_MS) {
                 judgmentText = '50';
                 judgmentClass = 'judgment-50';
-                score += 50;
+                score += 100; // OD8 osu!mania: 50 gibt 100 Punkte
                 combo++;
                 count50++;
             }
 
             bestHitNote.element.classList.add('hit-or-missed');
-            displayJudgment(judgmentText, judgmentClass);
+            displayJudgment(judgmentText, judgmentClass, timingMs);
 
         } else {
-            displayJudgment('MISS', 'judgment-miss');
-            resetCombo();
-            countMiss++;
-            console.log('Miss (no note in hit window)!');
+            // Ghosttapping implementation - don't break combo or count as miss when no note is present
+            // Just show a ghosttap indicator without affecting score or combo
+            displayJudgment('', 'judgment-ghost', 0);
+            // Don't reset combo or increment miss count for ghosttapping
         }
 
         updateScoreAndCombo();
         updateLiveAccuracyDisplay();
     }
 
-    function displayJudgment(text, className) {
+    function displayJudgment(text, className, timingMs = 0) {
+        // Entferne existierende Judgment-Elemente, um Stacking zu verhindern
+        const existingJudgments = document.querySelectorAll('.judgment-text');
+        existingJudgments.forEach(element => element.remove());
+        
         const judgmentElement = document.createElement('div');
         judgmentElement.classList.add('judgment-text', className);
-        judgmentElement.textContent = text;
+        // Die Anzeige erfolgt über CSS-Hintergrundbilder
         gameArea.appendChild(judgmentElement);
 
-        requestAnimationFrame(() => {
-            judgmentElement.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
-            judgmentElement.style.transform = 'translateX(-50%) translateY(-70px)';
-            judgmentElement.style.opacity = '0';
-        });
+        // Wenn es ein gültiger Hit ist (nicht ghosttap oder miss), fügen wir einen Tick zur UR-Bar hinzu
+        const urBar = document.getElementById('urBar');
+        if (urBar && text && text !== 'MISS' && className !== 'judgment-ghost') {
+            // Erstelle einen neuen Tick für die UR-Bar
+            const tick = document.createElement('div');
+            tick.classList.add('ur-tick');
+            
+            // Berechne die Position auf der UR-Bar (zentriert bei 50%, ±50% für max early/late)
+            // Verwende einen engeren Bereich für bessere Visualisierung
+            const maxDeviation = 75; // ±75ms auf der UR-Bar (etwas enger für bessere Sichtbarkeit)
+            const position = 50 + (timingMs / maxDeviation * 50);
+            const clampedPosition = Math.max(0, Math.min(100, position)); // Position auf 0-100% beschränken
+            tick.style.left = clampedPosition + '%';
+            
+            // Färbung je nach Timing
+            if (Math.abs(timingMs) <= 16) {  // MAX/Perfect timing (OD8)
+                tick.classList.add('perfect');
+            } else if (timingMs < 0) {
+                tick.classList.add('early');
+            } else {
+                tick.classList.add('late');
+            }
+            
+            // Füge Tick zur UR-Bar hinzu
+            urBar.appendChild(tick);
+            
+            // Lösche alten Tick nach 2 Sekunden mit Fade-out
+            setTimeout(() => {
+                tick.style.opacity = '0';
+                setTimeout(() => {
+                    if (tick.parentNode === urBar) {
+                        urBar.removeChild(tick);
+                    }
+                }, 1000);
+            }, 2000);
+        }
+
+        // Animation wird jetzt vollständig durch CSS gesteuert
 
         setTimeout(() => {
             judgmentElement.remove();
-        }, 400);
+        }, 300); // Angepasst an die kürzere Animationsdauer von 0.25s
     }
 
     function updateScoreAndCombo() {
@@ -994,8 +1032,9 @@
         if (totalJudgedNotes === 0) {
             accuracy = 100;
         } else {
-            const numerator = (countMax * 300) + (count300 * 300) + (count100 * 100) + (count50 * 50);
-            const denominator = totalJudgedNotes * 300;
+            // Exakte osu!mania Punkteberechnung für OD8
+            const numerator = (countMax * 320) + (count300 * 300) + (count100 * 200) + (count50 * 100);
+            const denominator = totalJudgedNotes * 320; // MAX gibt 320 Punkte in osu!mania
             accuracy = (numerator / denominator) * 100;
         }
         
@@ -1005,8 +1044,9 @@
     }
 
     function calculateRank(accuracy, countMax, count300, count100, count50, countMiss) {
+        // osu!mania OD8 Ranking System
         if (accuracy === 100 && count300 === 0 && count100 === 0 && count50 === 0 && countMiss === 0) {
-            return 'SS';
+            return 'SS'; // Perfekt
         }
         if (accuracy > 95) {
             return 'S';
@@ -1584,8 +1624,13 @@
     liveAccuracyDisplay.textContent = '0.00%';
     songProgressBarFill.style.width = '0%';
 
-    // Apply loaded settings
+    // Apply loaded settings and ensure they're within valid ranges
+    // Ensure scrollSpeed is between 10-40 (osu!mania standard)
+    currentScrollSpeed = Math.max(10, Math.min(40, Math.round(currentScrollSpeed)));
     scrollSpeedInput.value = currentScrollSpeed;
+    
+    // Map rate remains between 0.5 and 2.0
+    currentMapRate = Math.max(0.5, Math.min(2.0, currentMapRate));
     mapRateInput.value = currentMapRate;
 
     updateScrollSpeedDisplay();
@@ -1593,5 +1638,11 @@
     loadKeybinds();
     loadCustomColors();
 
+    // Sicherstellen, dass die Audio-Geschwindigkeit korrekt gesetzt ist
+    if (gameAudio.src) {
+        gameAudio.playbackRate = currentMapRate;
+        gameAudio.preservesPitch = !preservePitchToggle.checked;
+    }
+    
     // Ensure the start screen is shown initially
     showScreen('start');
